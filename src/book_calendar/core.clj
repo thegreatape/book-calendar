@@ -1,5 +1,6 @@
 (ns book-calendar.core
   (:require [clj-http.client :as http]
+            [clj-time.core :as t]
             [clojure.zip :as zip]
             [clojure.data.zip :as zf]
             [clojure.data.zip.xml :as xml-zip]
@@ -37,18 +38,29 @@
   {:title             to-string
    :description       to-string
    :image_url         to-string
-   ;:publication_year  to-string
-   ;:publication_month to-string
-   ;:publication_day   to-string
+   :publication_year  to-string
+   :publication_month to-string
+   :publication_day   to-string
    ;:authors           to-string
    })
 
-(defn extract-book
+(defn raw-book-hash
   [book-element]
   (let [extract-attribute (fn [book-hash [attr converter]]
                             (let [value (xml-zip/xml1-> book-element zf/descendants attr xml-zip/text)]
                               (assoc book-hash attr (converter value))))]
     (reduce extract-attribute {} book-attrs)))
+
+(defn add-publication-date
+  [book-hash]
+  (let [year (bigdec (:publication_year book-hash))
+        month (bigdec (:publication_month book-hash))
+        day (bigdec (:publication_day book-hash))]
+    (dissoc
+      (assoc book-hash :publication_date (t/date-time year month day) )
+      :publication_year :publication_month :publication_day)))
+
+(def extract-book (comp add-publication-date raw-book-hash))
 
 (defn extract-books
   [parsed-xml]
