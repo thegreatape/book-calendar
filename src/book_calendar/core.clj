@@ -32,7 +32,23 @@
   (xml-parse (:body (fetch url params))))
 
 (defn to-string [value]
-  (string/trim value))
+  (string/trim (xml-zip/xml1-> value xml-zip/text)))
+
+(defn extract-attribute
+  [element]
+  (fn [element-hash [attr converter]]
+    (let [value (xml-zip/xml1-> element zf/descendants attr)]
+      (assoc element-hash attr (converter value)))))
+
+(declare author-attrs)
+
+(defn extract-author
+  [author-element]
+  (reduce (extract-attribute author-element) {} author-attrs))
+
+(defn extract-authors
+  [element]
+  (map extract-author (xml-zip/xml-> element zf/descendants :author)))
 
 (def book-attrs
   {:title             to-string
@@ -41,15 +57,18 @@
    :publication_year  to-string
    :publication_month to-string
    :publication_day   to-string
-   ;:authors           to-string
+   :authors           extract-authors
    })
+
+(def author-attrs
+  {:id   to-string
+   :name to-string
+   })
+
 
 (defn raw-book-hash
   [book-element]
-  (let [extract-attribute (fn [book-hash [attr converter]]
-                            (let [value (xml-zip/xml1-> book-element zf/descendants attr xml-zip/text)]
-                              (assoc book-hash attr (converter value))))]
-    (reduce extract-attribute {} book-attrs)))
+  (reduce (extract-attribute book-element) {} book-attrs))
 
 (defn add-publication-date
   [book-hash]
@@ -60,12 +79,12 @@
       (assoc book-hash :publication_date (t/date-time year month day) )
       :publication_year :publication_month :publication_day)))
 
+
 (def extract-book (comp add-publication-date raw-book-hash))
 
 (defn extract-books
   [parsed-xml]
-  (let [book-list (xml-zip/xml-> parsed-xml zf/descendants :book)]
-    (map extract-book book-list)))
+  (map extract-book (xml-zip/xml-> parsed-xml zf/descendants :book)))
 
 (defn books-on-shelf
   [user-id shelf-name]
