@@ -86,14 +86,22 @@
 
 (def extract-book (comp add-publication-date raw-book-hash))
 
+(defn get-shelf
+  [user-id shelf-name]
+  (get-response "/review/list" {:v 2
+                                :id user-id
+                                :shelf shelf-name
+                                :per_page 200
+                                :key api-key }))
+
 (defn extract-books
   [parsed-xml]
   (map extract-book (xml-zip/xml-> parsed-xml zf/descendants :book)))
 
 (defn books-on-shelf
   [user-id shelf-name]
-  (extract-books
-    (get-response "/review/list" {:v 2
-                                  :id user-id
-                                  :shelf shelf-name
-                                  :key api-key })))
+  (extract-books (get-shelf user-id shelf-name)))
+
+(defn authors-on-shelf
+  [user-id shelf-name]
+  (extract-authors (get-shelf user-id shelf-name)))
