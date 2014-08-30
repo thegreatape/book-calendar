@@ -6,6 +6,7 @@
             [clojure.data.zip.xml :as xml-zip]
             [clojure.xml :as xml]
             [clojure.string :as string]
+            [throttler.core :refer [throttle-chan throttle-fn]]
   ))
 
 (def api-key
@@ -20,6 +21,9 @@
   (http/get (api-url url)
             {:query-params params}))
 
+(def goodreads-fetch
+  (throttle-fn fetch 1 :second))
+
 (defn xml-parse
   [xml-string]
   (zip/xml-zip
@@ -29,7 +33,7 @@
 
 (defn get-response
   [url params]
-  (xml-parse (:body (fetch url params))))
+  (xml-parse (:body (goodreads-fetch url params))))
 
 (defn to-string [value]
   (string/trim (xml-zip/xml1-> value xml-zip/text)))

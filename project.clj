@@ -7,4 +7,5 @@
                  [org.clojure/data.zip "0.1.1"]
                  [clj-time "0.8.0"]
                  [midje "1.6.3"]
+                 [throttler "1.0.0"]
                  [clj-http "1.0.0"]])
