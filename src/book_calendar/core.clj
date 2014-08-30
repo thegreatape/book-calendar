@@ -18,8 +18,10 @@
 
 (defn fetch
   [url params]
-  (http/get (api-url url)
-            {:query-params params}))
+  (if (empty? api-key)
+    (throw (Exception. "GOODREADS_API_KEY not set in environment"))
+    (http/get (api-url url)
+              {:query-params params})))
 
 (def goodreads-fetch
   (throttle-fn fetch 1 :second))
