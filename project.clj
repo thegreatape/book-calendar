@@ -8,4 +8,5 @@
                  [clj-time "0.8.0"]
                  [midje "1.6.3"]
                  [throttler "1.0.0"]
+                 [clojurewerkz/spyglass "1.0.0"]
                  [clj-http "1.0.0"]])

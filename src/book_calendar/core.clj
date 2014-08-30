@@ -6,6 +6,7 @@
             [clojure.data.zip.xml :as xml-zip]
             [clojure.xml :as xml]
             [clojure.string :as string]
+            [clojurewerkz.spyglass.client :as memcache]
             [throttler.core :refer [throttle-chan throttle-fn]]
   ))
 
@@ -16,12 +17,27 @@
   [url]
   (str "https://goodreads.com" url))
 
+(def memcache-url "127.0.0.1:11211")
+
+(defn to-cache-key
+  [url params]
+  (let [query (map (fn [[k v]] (str k "=" v)) params)]
+    (str url "?" (string/join "&" query))))
+
 (defn fetch
   [url params]
   (if (empty? api-key)
     (throw (Exception. "GOODREADS_API_KEY not set in environment"))
-    (http/get (api-url url)
-              {:query-params params})))
+
+    (let [cache (memcache/text-connection memcache-url)
+          url-key (to-cache-key url params)
+          cached-value (memcache/get cache url-key)]
+
+      (if-not (empty? cached-value)
+        cached-value
+        (let [fetched-value (:body (http/get (api-url url) {:query-params params}))
+              _  (memcache/set cache url-key 86400 fetched-value)]
+          fetched-value)))))
 
 (def goodreads-fetch
   (throttle-fn fetch 1 :second))
@@ -35,7 +51,7 @@
 
 (defn get-response
   [url params]
-  (xml-parse (:body (goodreads-fetch url params))))
+  (xml-parse (goodreads-fetch url params)))
 
 (defn to-string [value]
   (string/trim (xml-zip/xml1-> value xml-zip/text)))
