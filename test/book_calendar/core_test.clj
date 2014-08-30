@@ -27,7 +27,7 @@
   ))
 
 (fact "responses with pagination are detected correctly"
-  (more-reviews? (xml-parse (slurp "test/resources/reviews.xml")))         => false
-  (more-reviews? (xml-parse (slurp "test/resources/with-more-pages.xml"))) => true)
+  (more-pages? (xml-parse (slurp "test/resources/reviews.xml")))         => false
+  (more-pages? (xml-parse (slurp "test/resources/with-more-pages.xml"))) => true)
 
 

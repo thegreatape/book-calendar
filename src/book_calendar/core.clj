@@ -108,32 +108,47 @@
 
 (def extract-book (comp add-publication-date raw-book-hash))
 
-(defn more-reviews?
+(defn more-pages?
   [xml]
-  (let [reviews (xml-zip/xml1-> xml :reviews)]
+  (let [pagination-element (xml-zip/xml1->
+                             xml
+                             zf/descendants
+                             #(contains? #{:books :reviews} (:tag (zip/node %))))]
     (<
-      (bigdec (xml-zip/attr reviews :end))
-      (bigdec (xml-zip/attr reviews :total)))))
+     (bigdec (xml-zip/attr pagination-element :end))
+     (bigdec (xml-zip/attr pagination-element :total)))))
 
-(defn get-shelf
-  [user-id shelf-name extractor]
+(defn get-paginated
+  [fetcher extractor]
   (loop [page 1
          results #{}]
-    (let [response (get-response "/review/list" {:v 2
-                                                 :id user-id
-                                                 :shelf shelf-name
-                                                 :page page
-                                                 :per_page 200
-                                                 :key api-key })
+    (let [response (fetcher page)
           new-results (into results (extractor response))]
-      (if (more-reviews? response)
+      (if (more-pages? response)
         (recur (inc page) new-results)
         new-results
       ))))
 
+(defn get-shelf
+  [user-id shelf-name extractor]
+  (let [fetcher (fn [page] (get-response "/review/list" {:v 2
+                                                         :id user-id
+                                                         :shelf shelf-name
+                                                         :page page
+                                                         :per_page 200
+                                                         :key api-key }))]
+    (get-paginated fetcher extractor)))
+
 (defn extract-books
   [parsed-xml]
   (map extract-book (xml-zip/xml-> parsed-xml zf/descendants :book)))
+
+(defn books-by-author
+  [author]
+  (let [fetcher (fn [page] (get-response
+                             (str "/author/list/" (:id author) ".xml")
+                             {:page page :key api-key }))]
+    (get-paginated fetcher extract-books)))
 
 (defn books-on-shelf
   [user-id shelf-name]
@@ -142,3 +157,4 @@
 (defn authors-on-shelf
   [user-id shelf-name]
   (get-shelf user-id shelf-name extract-authors))
+
