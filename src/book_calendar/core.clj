@@ -86,13 +86,28 @@
 
 (def extract-book (comp add-publication-date raw-book-hash))
 
+(defn more-reviews?
+  [xml]
+  (let [reviews (xml-zip/xml1-> xml :reviews)]
+    (<
+      (bigdec (xml-zip/attr reviews :end))
+      (bigdec (xml-zip/attr reviews :total)))))
+
 (defn get-shelf
-  [user-id shelf-name]
-  (get-response "/review/list" {:v 2
-                                :id user-id
-                                :shelf shelf-name
-                                :per_page 200
-                                :key api-key }))
+  [user-id shelf-name extractor]
+  (loop [page 1
+         results #{}]
+    (let [response (get-response "/review/list" {:v 2
+                                                 :id user-id
+                                                 :shelf shelf-name
+                                                 :page page
+                                                 :per_page 200
+                                                 :key api-key })
+          new-results (into results (extractor response))]
+      (if (more-reviews? response)
+        (recur (inc page) new-results)
+        new-results
+      ))))
 
 (defn extract-books
   [parsed-xml]
@@ -100,8 +115,8 @@
 
 (defn books-on-shelf
   [user-id shelf-name]
-  (extract-books (get-shelf user-id shelf-name)))
+  (get-shelf user-id shelf-name extract-books))
 
 (defn authors-on-shelf
   [user-id shelf-name]
-  (extract-authors (get-shelf user-id shelf-name)))
+  (get-shelf user-id shelf-name extract-authors))

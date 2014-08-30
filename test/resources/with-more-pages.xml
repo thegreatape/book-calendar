@@ -1,0 +1,93 @@
+<GoodreadsResponse>
+  <Request>
+    <authentication>true</authentication>
+    <key>
+      <![CDATA[ nlb6cK1UX4hwsBdXr6srVQ ]]>
+    </key>
+    <method>
+      <![CDATA[ review_list ]]>
+    </method>
+  </Request>
+  <reviews start="1" end="1" total="5">
+    <review>
+      <id>1028232334</id>
+      <book>
+        <id type="integer">20873338</id>
+        <isbn nil="true"/>
+        <isbn13 nil="true"/>
+        <text_reviews_count type="integer">1</text_reviews_count>
+        <title>Clojure for the Brave and True</title>
+        <image_url>
+          https://d.gr-assets.com/books/1392849558m/20873338.jpg
+        </image_url>
+        <small_image_url>
+          https://d.gr-assets.com/books/1392849558s/20873338.jpg
+        </small_image_url>
+        <large_image_url/>
+        <link>
+          https://www.goodreads.com/book/show/20873338-clojure-for-the-brave-and-true
+        </link>
+        <num_pages/>
+        <format>ebook</format>
+        <edition_information/>
+        <publisher/>
+        <publication_day>6</publication_day>
+        <publication_year>2012</publication_year>
+        <publication_month>11</publication_month>
+        <average_rating>4.20</average_rating>
+        <ratings_count>5</ratings_count>
+        <description>
+          Clojure for the Brave and True is a work-in-progress available to read for free online.
+        </description>
+        <authors>
+          <author>
+            <id>7868379</id>
+            <name>Daniel Higginbotham</name>
+            <image_url>
+              <![CDATA[
+              https://s.gr-assets.com/assets/nophoto/user/u_200x266-312f5971f6b4a667fe0e83c852b56858.png
+              ]]>
+            </image_url>
+            <small_image_url>
+              <![CDATA[
+              https://s.gr-assets.com/assets/nophoto/user/u_50x66-d9f6a4a5badfda0f69e70cc94d962125.png
+              ]]>
+            </small_image_url>
+            <link>
+              <![CDATA[
+              https://www.goodreads.com/author/show/7868379.Daniel_Higginbotham
+              ]]>
+            </link>
+            <average_rating>4.20</average_rating>
+            <ratings_count>5</ratings_count>
+            <text_reviews_count>1</text_reviews_count>
+          </author>
+        </authors>
+        <published/>
+      </book>
+      <rating>4</rating>
+      <votes>0</votes>
+      <spoiler_flag>false</spoiler_flag>
+      <spoilers_state>none</spoilers_state>
+      <shelves>
+        <shelf name="read" exclusive="true"/>
+      </shelves>
+      <recommended_for/>
+      <recommended_by/>
+      <started_at>Sat Aug 16 07:42:12 -0700 2014</started_at>
+      <read_at>Sat Aug 23 10:17:58 -0700 2014</read_at>
+      <date_added>Sat Aug 16 07:42:12 -0700 2014</date_added>
+      <date_updated>Sat Aug 23 10:17:58 -0700 2014</date_updated>
+      <read_count/>
+      <body></body>
+      <comments_count>0</comments_count>
+      <url>
+        <![CDATA[ https://www.goodreads.com/review/show/1028232334 ]]>
+      </url>
+      <link>
+        <![CDATA[ https://www.goodreads.com/review/show/1028232334 ]]>
+      </link>
+      <owned>0</owned>
+    </review>
+  </reviews>
+</GoodreadsResponse>
