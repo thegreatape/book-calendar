@@ -4,38 +4,25 @@
             [clj-time.core :as t]
             [book-calendar.core :refer :all]))
 
-(let [xml (xml-parse (slurp "test/resources/reviews.xml"))]
+(fact "extracted books have the correct fields"
+  (let [xml (xml-parse (slurp "test/resources/reviews.xml"))]
+    (let [book (extract-book xml)]
+      (keys book)              => (just [:title :description :image_url :publication_date :authors] :in-any-order)
+      (:title book)            => "Clojure for the Brave and True"
+      (:description book)      => "Clojure for the Brave and True is a work-in-progress available to read for free online."
+      (:image_url book)        => "https://d.gr-assets.com/books/1392849558m/20873338.jpg"
+      (:publication_date book) => (t/date-time 2012 11 6)
+      (:authors book)          => '({:id "7868379" :name "Daniel Higginbotham"})
+    )))
 
-  (let [book (extract-book xml)]
+(fact "extracted books without publication dates have nil dates"
+  (:publication_date (extract-book (xml-parse (slurp "test/resources/reviews-no-pub-date.xml")))) => nil)
 
-    (fact "extracted books have the expected keys"
-          (keys book) => (just [:title :description :image_url :publication_date :authors] :in-any-order))
+(fact "extracted authors have the correct fields"
+  (let [authors (extract-authors (xml-parse (slurp "test/resources/reviews.xml")))]
 
-    (fact "extracted books have the correct title"
-          (:title book) => "Clojure for the Brave and True" )
+    (count authors)         => 1
+    (:id (first authors))   => "7868379"
+    (:name (first authors)) => "Daniel Higginbotham"
+  ))
 
-    (fact "extracted books have the correct description"
-          (:description book) => "Clojure for the Brave and True is a work-in-progress available to read for free online.")
-
-    (fact "extracted books have the correct image_url"
-          (:image_url book) => "https://d.gr-assets.com/books/1392849558m/20873338.jpg" )
-
-    (fact "extracted books have the publication date as a clj-time/date-time"
-          (:publication_date book) => (t/date-time 2012 11 6))
-
-    (fact "extracted books have the authors"
-          (:authors book) => '({:id "7868379" :name "Daniel Higginbotham"}))
-  )
-
-  (let [authors (extract-authors xml)]
-
-    (fact "a single author is extracted"
-          (count authors) => 1)
-
-    (fact "the extracted author has the correct id"
-          (:id (first authors)) => "7868379")
-
-    (fact "the extracted author has the correct name"
-          (:name (first authors)) => "Daniel Higginbotham")
-  )
-)

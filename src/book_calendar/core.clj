@@ -72,13 +72,17 @@
 
 (defn add-publication-date
   [book-hash]
-  (let [year (bigdec (:publication_year book-hash))
-        month (bigdec (:publication_month book-hash))
-        day (bigdec (:publication_day book-hash))]
-    (dissoc
-      (assoc book-hash :publication_date (t/date-time year month day) )
-      :publication_year :publication_month :publication_day)))
-
+  (let [publication-date (if (or (empty? (:publication_year book-hash))
+                                (empty? (:publication_month book-hash))
+                                (empty? (:publication_day book-hash)))
+                           nil
+                           (t/date-time
+                             (bigdec (:publication_year book-hash))
+                             (bigdec (:publication_month book-hash))
+                             (bigdec (:publication_day book-hash))))]
+        (dissoc
+          (assoc book-hash :publication_date publication-date)
+          :publication_year :publication_month :publication_day)))
 
 (def extract-book (comp add-publication-date raw-book-hash))
 
