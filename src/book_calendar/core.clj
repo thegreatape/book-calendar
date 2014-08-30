@@ -18,29 +18,33 @@
   (str "https://goodreads.com" url))
 
 (def memcache-url "127.0.0.1:11211")
+(def cache (memcache/text-connection memcache-url))
 
 (defn to-cache-key
   [url params]
   (let [query (map (fn [[k v]] (str k "=" v)) params)]
     (str url "?" (string/join "&" query))))
 
-(defn fetch
+(defn http-fetch
+  [url params]
+  (:body (http/get (api-url url) {:query-params params})))
+
+(def throttled-http-fetch
+  (throttle-fn http-fetch 1 :second))
+
+(defn goodreads-fetch
   [url params]
   (if (empty? api-key)
     (throw (Exception. "GOODREADS_API_KEY not set in environment"))
 
-    (let [cache (memcache/text-connection memcache-url)
-          url-key (to-cache-key url params)
+    (let [url-key (to-cache-key url params)
           cached-value (memcache/get cache url-key)]
 
       (if-not (empty? cached-value)
         cached-value
-        (let [fetched-value (:body (http/get (api-url url) {:query-params params}))
+        (let [fetched-value (throttled-http-fetch url params)
               _  (memcache/set cache url-key 86400 fetched-value)]
           fetched-value)))))
-
-(def goodreads-fetch
-  (throttle-fn fetch 1 :second))
 
 (defn xml-parse
   [xml-string]
@@ -121,7 +125,7 @@
 (defn get-paginated
   [fetcher extractor]
   (loop [page 1
-         results #{}]
+         results []]
     (let [response (fetcher page)
           new-results (into results (extractor response))]
       (if (more-pages? response)
@@ -158,3 +162,6 @@
   [user-id shelf-name]
   (get-shelf user-id shelf-name extract-authors))
 
+(defn books-by-authors
+  [authors]
+  (flatten (pmap books-by-author authors)))
