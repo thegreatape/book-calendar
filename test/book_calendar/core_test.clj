@@ -30,4 +30,12 @@
   (more-pages? (xml-parse (slurp "test/resources/reviews.xml")))         => false
   (more-pages? (xml-parse (slurp "test/resources/with-more-pages.xml"))) => true)
 
-
+(fact "books can be filtered by a date range"
+  (let [book1 {:publication_date (t/date-time 2012 11 1)}
+        book2 {:publication_date (t/date-time 2013 12 1)}
+        book3 {:publication_date (t/date-time 2014 8 1)}]
+  (published-between? book1 (t/date-time 2013 8) (t/date-time 2014 9)) => false
+  (published-between? book2 (t/date-time 2013 8) (t/date-time 2014 9)) => true
+  (published-between? book3 (t/date-time 2013 8) (t/date-time 2014 9)) => true
+  (published-between [book1 book2 book3] (t/date-time 2013 8) (t/date-time 2014 9)) => [book2 book3]
+))

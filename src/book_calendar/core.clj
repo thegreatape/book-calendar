@@ -165,3 +165,15 @@
 (defn books-by-authors
   [authors]
   (flatten (pmap books-by-author authors)))
+
+(defn published-between?
+  [book start end]
+  (let [pubdate (:publication_date book)]
+    (if (nil? pubdate)
+      false
+      (t/within? (t/interval start end) pubdate)
+  )))
+
+(defn published-between
+  [books start end]
+  (filter #(published-between? % start end) books))
