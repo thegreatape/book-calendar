@@ -18,7 +18,8 @@
   (str "https://goodreads.com" url))
 
 (def memcache-url "127.0.0.1:11211")
-(def cache (memcache/text-connection memcache-url))
+(defn cache []
+  (memcache/text-connection memcache-url))
 
 (defn to-cache-key
   [url params]
@@ -38,7 +39,7 @@
     (throw (Exception. "GOODREADS_API_KEY not set in environment"))
 
     (let [url-key (to-cache-key url params)
-          cached-value (memcache/get cache url-key)]
+          cached-value (memcache/get (cache) url-key)]
 
       (if-not (empty? cached-value)
         cached-value
