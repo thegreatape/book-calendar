@@ -1,19 +1,21 @@
 'use strict'
 
-describe 'Controller: MainCtrl', ->
+describe 'Controller: BooksCtrl', ->
 
   # load the controller's module
   beforeEach module 'angularAppApp'
 
-  MainCtrl = {}
+  BooksCtrl = {}
   scope = {}
 
   # Initialize the controller and a mock scope
   beforeEach inject ($controller, $rootScope) ->
     scope = $rootScope.$new()
-    MainCtrl = $controller 'MainCtrl', {
+    BooksCtrl = $controller 'BooksCtrl', {
       $scope: scope
     }
 
-  it 'should attach a list of awesomeThings to the scope', ->
-    expect(scope.awesomeThings.length).toBe 3
+  describe 'calendar generations', ->
+    it 'generates an empty array when no books are present', ->
+      scope.books = []
+      expect(scope.booksByAuthor().length).toBe 0

@@ -2,15 +2,11 @@
 
 ###*
  # @ngdoc function
- # @name angularAppApp.controller:MainCtrl
+ # @name angularAppApp.controller:BooksCtrl
  # @description
- # # MainCtrl
+ # # BooksCtrl
  # Controller of the angularAppApp
 ###
 angular.module('angularAppApp')
-  .controller 'MainCtrl', ($scope) ->
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate'
-      'AngularJS'
-      'Karma'
-    ]
+  .controller 'BooksCtrl', ($scope) ->
+    $scope.booksByAuthor = -> []
