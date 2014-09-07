@@ -44,7 +44,7 @@
       (if-not (empty? cached-value)
         cached-value
         (let [fetched-value (throttled-http-fetch url params)
-              _  (memcache/set cache url-key 86400 fetched-value)]
+              _  (memcache/set (cache) url-key 86400 fetched-value)]
           fetched-value)))))
 
 (defn xml-parse
@@ -166,6 +166,11 @@
 (defn books-by-authors
   [authors]
   (flatten (pmap books-by-author authors)))
+
+(defn books-by-authors-on-shelf
+  [user-id shelf-name]
+  (flatten (pmap books-by-author (authors-on-shelf user-id shelf-name))))
+
 
 (defn published-between?
   [book start end]
