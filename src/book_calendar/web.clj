@@ -5,6 +5,7 @@
             [clojurewerkz.support.json :as support-json]
             [ring.middleware.json :as ring-json]
             [ring.middleware.params :as ring-params]
+            [ring.middleware.cors :refer [wrap-cors]]
             [ring.adapter.jetty :as ring])
   (:use [book-calendar.core]
         [hiccup.core]
@@ -28,10 +29,12 @@
   (bigdec (or (System/getenv "PORT") 8080)))
 
 (def handler
-  (-> routes
-      ring-params/wrap-params
-      ring-json/wrap-json-response
-      ring-json/wrap-json-body))
+  (wrap-cors (-> routes
+                 ring-params/wrap-params
+                 ring-json/wrap-json-response
+                 ring-json/wrap-json-body)
+             :access-control-allow-origin #"http://localhost:9000"
+             :access-control-allow-methods [:get :put :post :delete]))
 
 (defn -main []
   (ring/run-jetty #'handler {:port port :join? false}))
