@@ -8,7 +8,7 @@
  # Controller of the angularAppApp
 ###
 angular.module('angularAppApp')
-  .controller 'BooksCtrl', ($scope, $http, Calendar) ->
+  .controller 'BooksCtrl', ($scope, $http, Calendar, Pusher) ->
 
     $scope.start = moment("2014-01-01")
     $scope.end = moment("2015-06-01")
@@ -20,10 +20,8 @@ angular.module('angularAppApp')
 
     $scope.books = []
     $scope.authors = []
-    $scope.$watch 'books', =>
+    $scope.$watchCollection 'books', =>
       $scope.authors = Calendar.monthlyByAuthor($scope.books)
 
-    $http.get("http://localhost:3001/user/2003928/books?shelf=read").success (data) ->
-      console.log data
-      $scope.books = data
-
+    Pusher.subscribe "user-#{2003928}", 'book', (book) ->
+      $scope.books.push book

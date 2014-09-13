@@ -18,6 +18,7 @@
                  [clojurewerkz/support "1.1.0"]
                  [hiccup "1.0.5"]
                  [ring-cors "0.1.4"]
+                 [clj-pusher "0.3.1"]
                  ]
   :main ^:skip-aot book-calendar.web
   :uberjar-name "book-calendar-standalone.jar"

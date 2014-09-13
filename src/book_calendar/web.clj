@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [defroutes GET]]
             [compojure.handler :as ch]
             [clj-time.core :as t]
+            [pusher :as pusher]
             [clojurewerkz.support.json :as support-json]
             [ring.middleware.json :as ring-json]
             [ring.middleware.params :as ring-params]
@@ -11,6 +12,21 @@
         [hiccup.core]
         [ring.util.response :only [response]])
   (:gen-class))
+
+(def pusher-key
+  (System/getenv "PUSHER_KEY"))
+
+(def pusher-secret
+  (System/getenv "PUSHER_SECRET"))
+
+(def pusher-app-id
+  (System/getenv "PUSHER_APP_ID"))
+
+(defn notify-book
+  [user-id book]
+  (pusher/with-pusher-auth [pusher-app-id pusher-key pusher-secret]
+    (pusher/with-pusher-channel (str "user-" user-id)
+      (pusher/trigger "book" book))))
 
 (defroutes routes
 

@@ -15,13 +15,17 @@ angular
     'ngResource',
     'ngRoute',
     'ngSanitize',
-    'ngTouch'
+    'ngTouch',
+    'doowb.angular-pusher'
+    'config'
   ])
-  .config ($routeProvider) ->
+  .config(($routeProvider) ->
     $routeProvider
       .when '/',
         templateUrl: 'views/books.html'
         controller: 'BooksCtrl'
       .otherwise
         redirectTo: '/'
-
+  ).config((PusherServiceProvider, ENV) ->
+    PusherServiceProvider.setToken(ENV.PUSHER_KEY).setOptions({})
+  )

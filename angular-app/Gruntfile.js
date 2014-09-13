@@ -407,9 +407,62 @@ module.exports = function (grunt) {
         configFile: 'test/karma.conf.coffee',
         singleRun: true
       }
+    },
+
+    // env variable sourcing
+    env : {
+      dev : {
+        src : "../.env"
+      },
+      functions: {
+        BY_FUNCTION: function() {
+          var value = '123';
+          console.log('setting BY_FUNCTION to ' + value);
+          return value;
+        }
+      }
+    },
+
+    // config file generation
+    ngconstant: {
+      // Options for all targets
+      options: {
+        space: '  ',
+        wrap: '"use strict";\n\n {%= __ngModule %}',
+        name: 'config',
+      },
+      // Environment targets
+      development: {
+        options: {
+          dest: '<%= yeoman.app %>/scripts/config.js'
+        },
+        constants: function() {
+          return {
+            ENV: {
+              name: 'development',
+              PUSHER_KEY: process.env.PUSHER_KEY
+            }
+          }
+        }
+      },
+      production: {
+        options: {
+          dest: '<%= yeoman.dist %>/scripts/config.js'
+        },
+        constants: function() {
+          return {
+            ENV: {
+              name: 'production',
+              PUSHER_KEY: process.env.PUSHER_KEY
+            }
+          }
+        }
+      }
     }
+
   });
 
+  grunt.loadNpmTasks('grunt-env');
 
   grunt.registerTask('serve', 'Compile then start a connect web server', function (target) {
     if (target === 'dist') {
@@ -418,6 +471,8 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
+      'env:dev',
+      'ngconstant:development',
       'wiredep',
       'concurrent:server',
       'autoprefixer',
@@ -441,6 +496,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'ngconstant:production',
     'wiredep',
     'useminPrepare',
     'concurrent:dist',
