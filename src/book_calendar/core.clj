@@ -8,7 +8,10 @@
             [clojure.string :as string]
             [clojurewerkz.spyglass.client :as memcache]
             [throttler.core :refer [throttle-chan throttle-fn]]
+            [clojure.core.async :refer [go chan >! >!!]]
   ))
+
+(memcache/set-log-level! "WARNING")
 
 (def api-key
   (System/getenv "GOODREADS_API_KEY"))
@@ -148,12 +151,22 @@
   [parsed-xml]
   (map extract-book (xml-zip/xml-> parsed-xml zf/descendants :book)))
 
-(defn books-by-author
+(defn author-book-fetcher
   [author]
-  (let [fetcher (fn [page] (get-response
-                             (str "/author/list/" (:id author) ".xml")
-                             {:page page :key api-key }))]
-    (get-paginated fetcher extract-books)))
+  (fn [page] (get-response
+               (str "/author/list/" (:id author) ".xml")
+               {:page page :key api-key })))
+
+(defn books-by-author
+  ([author]
+   (println "BBA WITHOUT CHANNEL")
+   (get-paginated (author-book-fetcher author) extract-books))
+  ([author ch]
+   (println "\nBBA WITH CHANNEL\n")
+   (let [books (get-paginated (author-book-fetcher author) extract-books)
+         sender (fn [book] (>!! ch book) book)]
+     (sender books)
+     (pmap sender books))))
 
 (defn books-on-shelf
   [user-id shelf-name]
@@ -164,12 +177,18 @@
   (get-shelf user-id shelf-name extract-authors))
 
 (defn books-by-authors
-  [authors]
-  (flatten (pmap books-by-author authors)))
+  ([authors]
+   (flatten (pmap books-by-author authors)))
+  ([authors ch]
+   (pmap #(books-by-author % ch) authors)))
 
 (defn books-by-authors-on-shelf
-  [user-id shelf-name]
-  (flatten (pmap books-by-author (authors-on-shelf user-id shelf-name))))
+  ([user-id shelf-name]
+   (println "\nAOS WITHOUT CHAN")
+   (flatten (pmap books-by-author (authors-on-shelf user-id shelf-name))))
+  ([user-id shelf-name ch]
+   (println "\nAOS WITH CHAN")
+   (pmap #(books-by-author % ch) (authors-on-shelf user-id shelf-name))))
 
 
 (defn published-between?

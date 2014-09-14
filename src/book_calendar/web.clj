@@ -7,6 +7,7 @@
             [ring.middleware.json :as ring-json]
             [ring.middleware.params :as ring-params]
             [ring.middleware.cors :refer [wrap-cors]]
+            [clojure.core.async :refer [go <! <!! chan]]
             [ring.adapter.jetty :as ring])
   (:use [book-calendar.core]
         [hiccup.core]
@@ -27,6 +28,15 @@
   (pusher/with-pusher-auth [pusher-app-id pusher-key pusher-secret]
     (pusher/with-pusher-channel (str "user-" user-id)
       (pusher/trigger "book" book))))
+
+(defn fetch-books
+  [user-id shelf]
+  (let [ch (chan)]
+    (go (books-by-authors-on-shelf user-id shelf ch))
+    (go (while true
+               (let [book (<!! ch)]
+                 (notify-book user-id book))))
+    ch))
 
 (defroutes routes
 
@@ -54,3 +64,14 @@
 
 (defn -main []
   (ring/run-jetty #'handler {:port port :join? false}))
+
+;(let [ch (chan)]
+  ;(go (while true
+        ;(let [v (<! ch)]
+          ;(println "Read: " v))))
+  ;(go (>! ch "hi")
+      ;(<! (timeout 5000))
+      ;(>! ch "there")))
+
+
+
