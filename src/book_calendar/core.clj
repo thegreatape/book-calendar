@@ -82,7 +82,6 @@
 
 (def book-attrs
   {:title             to-string
-   :description       to-string
    :image_url         to-string
    :publication_year  to-string
    :publication_month to-string
@@ -159,13 +158,10 @@
 
 (defn books-by-author
   ([author]
-   (println "BBA WITHOUT CHANNEL")
    (get-paginated (author-book-fetcher author) extract-books))
   ([author ch]
-   (println "\nBBA WITH CHANNEL\n")
    (let [books (get-paginated (author-book-fetcher author) extract-books)
-         sender (fn [book] (>!! ch book) book)]
-     (sender books)
+         sender (fn [book] (go (>! ch book)) book)]
      (pmap sender books))))
 
 (defn books-on-shelf
@@ -178,18 +174,15 @@
 
 (defn books-by-authors
   ([authors]
-   (flatten (pmap books-by-author authors)))
+   (flatten (map books-by-author authors)))
   ([authors ch]
    (pmap #(books-by-author % ch) authors)))
 
 (defn books-by-authors-on-shelf
   ([user-id shelf-name]
-   (println "\nAOS WITHOUT CHAN")
    (flatten (pmap books-by-author (authors-on-shelf user-id shelf-name))))
   ([user-id shelf-name ch]
-   (println "\nAOS WITH CHAN")
    (pmap #(books-by-author % ch) (authors-on-shelf user-id shelf-name))))
-
 
 (defn published-between?
   [book start end]

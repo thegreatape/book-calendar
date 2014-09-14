@@ -23,6 +23,12 @@
 (def pusher-app-id
   (System/getenv "PUSHER_APP_ID"))
 
+(def start-date
+  (t/date-time 2014 1 1))
+
+(def end-date
+  (t/date-time 2015 6 1))
+
 (defn notify-book
   [user-id book]
   (pusher/with-pusher-auth [pusher-app-id pusher-key pusher-secret]
@@ -34,8 +40,9 @@
   (let [ch (chan)]
     (go (books-by-authors-on-shelf user-id shelf ch))
     (go (while true
-               (let [book (<!! ch)]
-                 (notify-book user-id book))))
+               (let [book (<! ch)]
+                 (if (published-between? book start-date end-date)
+                   (notify-book user-id book)))))
     ch))
 
 (defroutes routes
