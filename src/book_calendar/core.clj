@@ -159,9 +159,9 @@
 (defn books-by-author
   ([author]
    (get-paginated (author-book-fetcher author) extract-books))
-  ([author ch]
+  ([author callback]
    (let [books (get-paginated (author-book-fetcher author) extract-books)
-         sender (fn [book] (go (>! ch book)) book)]
+         sender (fn [book] (callback book) book)]
      (pmap sender books))))
 
 (defn books-on-shelf
@@ -175,14 +175,14 @@
 (defn books-by-authors
   ([authors]
    (flatten (map books-by-author authors)))
-  ([authors ch]
-   (pmap #(books-by-author % ch) authors)))
+  ([authors callback]
+   (pmap #(books-by-author % callback) authors)))
 
 (defn books-by-authors-on-shelf
   ([user-id shelf-name]
    (flatten (pmap books-by-author (authors-on-shelf user-id shelf-name))))
-  ([user-id shelf-name ch]
-   (pmap #(books-by-author % ch) (authors-on-shelf user-id shelf-name))))
+  ([user-id shelf-name callback]
+   (pmap #(books-by-author % callback) (authors-on-shelf user-id shelf-name))))
 
 (defn published-between?
   [book start end]

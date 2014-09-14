@@ -37,13 +37,12 @@
 
 (defn fetch-books
   [user-id shelf]
-  (let [ch (chan)]
-    (go (books-by-authors-on-shelf user-id shelf ch))
-    (go (while true
-               (let [book (<! ch)]
-                 (if (published-between? book start-date end-date)
-                   (notify-book user-id book)))))
-    ch))
+    (books-by-authors-on-shelf
+      user-id
+      shelf
+      (fn [book]
+        (if (published-between? book start-date end-date)
+          (notify-book user-id book)))))
 
 (defroutes routes
 
