@@ -13,6 +13,7 @@
         <td>{{author.author.name}}</td>
         <td ng-repeat="month in months track by month">
           <ul ng-if="author.months[month]">
+            {{month}}
             <li ng-repeat="book in author.months[month] track by book.id">
               {{book.title}}
               <img ng-src="{{book.image_url}}"/>
