@@ -1,5 +1,5 @@
 <div class="container-full">
-  <h2>Book Count: {{books.length}}</h2>
+  <h3>{{books.length}} books</h3>
   <table class="table">
     <thead>
       <tr>
@@ -9,11 +9,11 @@
     </thead>
 
     <tbody>
-      <tr ng-repeat="author in authors">
+      <tr ng-repeat="author in authors track by author.author.id">
         <td>{{author.author.name}}</td>
-        <td ng-repeat="month in months">
+        <td ng-repeat="month in months track by month">
           <ul ng-if="author.months[month]">
-            <li ng-repeat="book in author.months[month]">
+            <li ng-repeat="book in author.months[month] track by book.id">
               {{book.title}}
               <img ng-src="{{book.image_url}}"/>
             </li>
